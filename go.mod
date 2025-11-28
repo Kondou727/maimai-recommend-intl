@@ -6,6 +6,7 @@ require (
 	github.com/AllenDang/giu v0.14.1
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/pressly/goose v2.7.0+incompatible
+	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
 	golang.org/x/sync v0.17.0
 	modernc.org/sqlite v1.39.1
 )
@@ -26,7 +27,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
-	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	golang.design/x/hotkey v0.4.1 // indirect
 	golang.design/x/mainthread v0.3.0 // indirect

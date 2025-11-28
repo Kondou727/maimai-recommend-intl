@@ -15,17 +15,15 @@ import (
 	"github.com/pressly/goose"
 )
 
-const MAIMAI_SONGS_JSON_LINK = "https://maimai.sega.jp/data/maimai_songs.json"
-const REIWA_JSON_LINK = "https://reiwa.f5.si/maimai_record.json"
-
 // Fills the songdata.db
 func PopulateSongData(cfg *config.ApiConfig) error {
 
-	songs, records, err := pullJson()
+	songs, records, err := pullJsonINTL()
 	if err != nil {
 		log.Printf("failed to pull official json")
 		return err
 	}
+	log.Printf("populating songdata...")
 	for _, r := range records {
 		string_level := string(r.Level)
 		cleaned_level := strings.ReplaceAll(strings.ReplaceAll(string_level, ".0", ""), ".6", "+")
@@ -75,12 +73,13 @@ func PopulateSongData(cfg *config.ApiConfig) error {
 			}
 		}
 	}
+	log.Printf("finished populating songdata")
 	return nil
 
 }
 
 // Pulls the jsons
-func pullJson() (maimai_songs, reiwa_songs, error) {
+func pullJsonINTL() (maimai_songs, reiwa_songs, error) {
 	res, err := http.Get(MAIMAI_SONGS_JSON_LINK)
 	if err != nil {
 		log.Printf("get request to official maimai server failed: %s", err)

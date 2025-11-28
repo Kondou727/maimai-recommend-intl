@@ -10,6 +10,33 @@ import (
 	"database/sql"
 )
 
+const createChartStatCN = `-- name: CreateChartStatCN :exec
+INSERT INTO chartstatscn (
+    song_id, diff, count, std_dev
+)
+VALUES (
+    ?, ?, ?, ?
+)
+ON CONFLICT (song_id, diff) DO NOTHING
+`
+
+type CreateChartStatCNParams struct {
+	SongID int64
+	Diff   string
+	Count  int64
+	StdDev float64
+}
+
+func (q *Queries) CreateChartStatCN(ctx context.Context, arg CreateChartStatCNParams) error {
+	_, err := q.db.ExecContext(ctx, createChartStatCN,
+		arg.SongID,
+		arg.Diff,
+		arg.Count,
+		arg.StdDev,
+	)
+	return err
+}
+
 const createSong = `-- name: CreateSong :exec
 INSERT INTO songdata (
     id, title, artist, genre, img, release, version, is_dx, diff, level, const, is_utage, is_buddy
@@ -51,6 +78,33 @@ func (q *Queries) CreateSong(ctx context.Context, arg CreateSongParams) error {
 		arg.Const,
 		arg.IsUtage,
 		arg.IsBuddy,
+	)
+	return err
+}
+
+const createSongCN = `-- name: CreateSongCN :exec
+INSERT INTO songdatacn (
+    id, diff, title, is_dx
+)
+VALUES (
+    ?, ?, ?, ?
+)
+ON CONFLICT (id, diff) DO NOTHING
+`
+
+type CreateSongCNParams struct {
+	ID    int64
+	Diff  string
+	Title string
+	IsDx  bool
+}
+
+func (q *Queries) CreateSongCN(ctx context.Context, arg CreateSongCNParams) error {
+	_, err := q.db.ExecContext(ctx, createSongCN,
+		arg.ID,
+		arg.Diff,
+		arg.Title,
+		arg.IsDx,
 	)
 	return err
 }

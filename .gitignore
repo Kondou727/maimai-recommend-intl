@@ -33,6 +33,7 @@ go.work.sum
 
 # Others
 resources/
+*.bat
 
 # Database stuff
 *.db

@@ -8,6 +8,20 @@ import (
 	"database/sql"
 )
 
+type Chartstatscn struct {
+	SongID int64
+	Diff   string
+	Count  int64
+	StdDev float64
+}
+
+type Songdatacn struct {
+	ID    int64
+	Diff  string
+	Title string
+	IsDx  bool
+}
+
 type Songdatum struct {
 	ID      string
 	Title   string

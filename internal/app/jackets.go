@@ -43,7 +43,7 @@ func PullJackets(cfg *config.ApiConfig) error {
 			f, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
 			if err != nil {
 				if os.IsExist(err) {
-					log.Printf("%s already exists, skipping...", j)
+					log.Printf("%s.png already exists, skipping...", j)
 					return
 				}
 				log.Printf("failed to open file: %s", err)
