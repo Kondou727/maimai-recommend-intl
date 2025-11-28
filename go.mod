@@ -1,4 +1,4 @@
-module github.com/Kondou727/maimai-stats-tracker
+module github.com/Kondou727/maimai-recommend-intl
 
 go 1.25.3
 

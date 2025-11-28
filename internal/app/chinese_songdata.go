@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Kondou727/maimai-stats-tracker/internal/config"
-	songdatadb "github.com/Kondou727/maimai-stats-tracker/internal/database/songdata"
+	"github.com/Kondou727/maimai-recommend-intl/internal/config"
+	songdatadb "github.com/Kondou727/maimai-recommend-intl/internal/database/songdata"
 )
 
 // gets chinese song data

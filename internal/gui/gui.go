@@ -4,7 +4,7 @@ import (
 	"log"
 
 	g "github.com/AllenDang/giu"
-	"github.com/Kondou727/maimai-stats-tracker/internal/config"
+	"github.com/Kondou727/maimai-recommend-intl/internal/config"
 )
 
 func Loop(cfg *config.ApiConfig) {
@@ -17,6 +17,6 @@ func Loop(cfg *config.ApiConfig) {
 
 func Run(cfg *config.ApiConfig) {
 	log.Print("Running gui...")
-	w := g.NewMasterWindow("maimai-stats-tracker", 1280, 720, 0)
+	w := g.NewMasterWindow("maimai-recommend-intl", 1280, 720, 0)
 	w.Run(func() { Loop(cfg) })
 }

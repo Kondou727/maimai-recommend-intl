@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Kondou727/maimai-stats-tracker/internal/config"
-	scoresdb "github.com/Kondou727/maimai-stats-tracker/internal/database/scores"
+	"github.com/Kondou727/maimai-recommend-intl/internal/config"
+	scoresdb "github.com/Kondou727/maimai-recommend-intl/internal/database/scores"
 	"github.com/gocarina/gocsv"
 	"github.com/pressly/goose"
 )

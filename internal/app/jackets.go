@@ -8,7 +8,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/Kondou727/maimai-stats-tracker/internal/config"
+	"github.com/Kondou727/maimai-recommend-intl/internal/config"
 	"golang.org/x/sync/semaphore"
 )
 

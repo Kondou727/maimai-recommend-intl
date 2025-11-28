@@ -5,8 +5,8 @@ import (
 
 	"github.com/AllenDang/giu"
 	g "github.com/AllenDang/giu"
-	"github.com/Kondou727/maimai-stats-tracker/internal/app"
-	"github.com/Kondou727/maimai-stats-tracker/internal/config"
+	"github.com/Kondou727/maimai-recommend-intl/internal/app"
+	"github.com/Kondou727/maimai-recommend-intl/internal/config"
 	"github.com/sqweek/dialog"
 )
 

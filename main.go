@@ -3,15 +3,15 @@ package main
 import (
 	"log"
 
-	app "github.com/Kondou727/maimai-stats-tracker/internal/app"
-	config "github.com/Kondou727/maimai-stats-tracker/internal/config"
-	scoresdb "github.com/Kondou727/maimai-stats-tracker/internal/database/scores"
-	songdatadb "github.com/Kondou727/maimai-stats-tracker/internal/database/songdata"
+	app "github.com/Kondou727/maimai-recommend-intl/internal/app"
+	config "github.com/Kondou727/maimai-recommend-intl/internal/config"
+	scoresdb "github.com/Kondou727/maimai-recommend-intl/internal/database/scores"
+	songdatadb "github.com/Kondou727/maimai-recommend-intl/internal/database/songdata"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	log.Printf("Starting maimai-stats-tracker")
+	log.Printf("Starting maimai-recommend-intl")
 
 	scoresDB, err := app.LoadScoresDB()
 	if err != nil {
