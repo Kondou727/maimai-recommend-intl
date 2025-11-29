@@ -3,9 +3,11 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -13,55 +15,134 @@ import (
 	songdatadb "github.com/Kondou727/maimai-recommend-intl/internal/database/songdata"
 )
 
+var NoUpdate = errors.New("no update")
+var songdataJson = "resources/divingfish_songdata.json"
+var chartstatsJson = "resources/divingfish_chartstats.json"
+
 // gets chinese song data
 func pullJsonCN() ([]divingFishSong, chartStatsResponse, error) {
-	songdataUrl := DIVING_FISH_API + "music_data"
-	res, err := http.Get(songdataUrl)
+	etags, err := loadEtags()
 	if err != nil {
-		log.Printf("get songdata request to diving-fish server failed: %s", err)
-		return nil, chartStatsResponse{}, err
-	}
-	defer res.Body.Close()
-
-	chartstatsUrl := DIVING_FISH_API + "chart_stats"
-	res2, err := http.Get(chartstatsUrl)
-	if err != nil {
-		log.Printf("get chart stats request to diving-fish server failed: %s", err)
-		return nil, chartStatsResponse{}, err
-	}
-	defer res2.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("failed to read songdata request body: %s", err)
-		return nil, chartStatsResponse{}, err
-	}
-
-	body2, err := io.ReadAll(res2.Body)
-	if err != nil {
-		log.Printf("failed to read chart stats request body: %s", err)
 		return nil, chartStatsResponse{}, err
 	}
 
 	var songdata []divingFishSong
+	songdataUrl := DIVING_FISH_API + "music_data"
+	etag, body, err := sendGetRequestWithEtag(songdataUrl, etags.Songdata)
+	if err == NoUpdate {
+		body, err = os.ReadFile(songdataJson)
+		if err != nil {
+			log.Printf("failed to read %s: %s", songdataJson, err)
+			return nil, chartStatsResponse{}, err
+		}
+	} else if err != nil {
+		log.Printf("failed to send get request: %s", err)
+		return nil, chartStatsResponse{}, err
+	} else {
+		if err := json.Unmarshal(body, &songdata); err != nil {
+			log.Printf("failed to unmarshal music_data.json: %s", err)
+			return nil, chartStatsResponse{}, err
+		}
+
+		err = os.WriteFile(songdataJson, body, 0644)
+		if err != nil {
+			return nil, chartStatsResponse{}, err
+		}
+	}
+
 	var chartstats chartStatsResponse
+	chartstatsUrl := DIVING_FISH_API + "chart_stats"
+	etag2, body2, err := sendGetRequestWithEtag(chartstatsUrl, etags.Chartstats)
+	if err == NoUpdate {
+		body, err = os.ReadFile(chartstatsJson)
+		if err != nil {
+			log.Printf("failed to read %s: %s", chartstatsJson, err)
+			return nil, chartStatsResponse{}, err
+		}
+	} else if err != nil {
+		log.Printf("failed to send get request: %s", err)
+		return nil, chartStatsResponse{}, err
+	} else {
+		if err := json.Unmarshal(body2, &chartstats); err != nil {
+			log.Printf("failed to unmarshal chart_stats.json: %s", err)
+			return nil, chartStatsResponse{}, err
+		}
 
-	/*
-		// Strips UTF-8 BOM if needed
-		cleaned_body := bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
-		cleaned_body2 := bytes.TrimPrefix(body2, []byte("\xef\xbb\xbf"))
-	*/
+		err = os.WriteFile(chartstatsJson, body2, 0644)
+		if err != nil {
+			return nil, chartStatsResponse{}, err
+		}
+	}
 
-	if err := json.Unmarshal(body, &songdata); err != nil {
-		log.Printf("failed to unmarshal music_data.json: %s", err)
+	err = saveEtags(divingFishEtags{
+		Songdata:   etag,
+		Chartstats: etag2,
+	})
+	if err != nil {
 		return nil, chartStatsResponse{}, err
 	}
 
-	if err := json.Unmarshal(body2, &chartstats); err != nil {
-		log.Printf("failed to unmarshal chart_stats.json: %s", err)
-		return nil, chartStatsResponse{}, err
-	}
 	return songdata, chartstats, nil
+}
+
+func sendGetRequestWithEtag(url string, etag string) (string, []byte, error) {
+	client := &http.Client{
+		Timeout: HTTP_REQUEST_TIMEOUT,
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("failed make get request: %s", err)
+		return etag, nil, err
+	}
+
+	req.Header.Set("If-None-Match", etag)
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Printf("failed to get %s: %s", url, err)
+		return etag, nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusNotModified {
+		log.Printf("no new update on server, using saved json...")
+		return etag, nil, NoUpdate
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("failed to read body of %s: %s", url, err)
+		return res.Header.Get("etag"), nil, NoUpdate
+	}
+
+	return res.Header.Get("etag"), body, nil
+}
+func loadEtags() (divingFishEtags, error) {
+	var cfg divingFishEtags
+	f, err := os.Open(DIVING_FISH_ETAGS_JSON)
+	if err != nil {
+		return cfg, err
+	}
+	defer f.Close()
+
+	err = json.NewDecoder(f).Decode(&cfg)
+	return cfg, err
+}
+
+func saveEtags(t divingFishEtags) error {
+	jsondata, err := json.Marshal(t)
+	if err != nil {
+		log.Printf("failed to marshal etags: %s", err)
+		return err
+	}
+
+	err = os.WriteFile(DIVING_FISH_ETAGS_JSON, jsondata, 0644)
+	if err != nil {
+		log.Printf("failed to write etags: %s", err)
+		return err
+	}
+	return nil
 }
 
 // fills the songdata.db
@@ -138,4 +219,9 @@ type divingFishChartStat struct {
 
 type chartStatsResponse struct {
 	Charts map[string][]divingFishChartStat `json:"charts"`
+}
+
+type divingFishEtags struct {
+	Songdata   string `json:"songdata"`
+	Chartstats string `json:"chartstats"`
 }
